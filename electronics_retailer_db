@@ -1,0 +1,131 @@
+CREATE DATABASE electronics_retailer;
+USE electronics_retailer;
+
+CREATE TABLE parts(
+id INT AUTO_INCREMENT,
+name VARCHAR(80) ,
+price FLOAT,
+currency VARCHAR(3),
+PRIMARY KEY(id)
+)Engine = InnoDB;
+
+CREATE TABLE repaired_device(
+id INT AUTO_INCREMENT ,
+name VARCHAR(80),
+status_report VARCHAR(120),
+additional_information VARCHAR(120),
+PRIMARY KEY(id)
+)Engine = InnoDB;
+
+CREATE TABLE retail_order(
+id INT AUTO_INCREMENT,
+part_id INT,
+device_id INT,
+PRIMARY KEY (id),
+FOREIGN KEY (part_id) REFERENCES parts(id),
+FOREIGN KEY (device_id) REFERENCES repaired_device(id)
+)Engine = InnoDB;
+
+CREATE TABLE employee ( 
+id INT AUTO_INCREMENT,
+name VARCHAR(80),
+PRIMARY KEY (id)
+)ENGINE = InnoDB;
+
+CREATE TABLE customer (
+id INT AUTO_INCREMENT,
+name VARCHAR(80),
+phone INT ,
+billing_information VARCHAR(30),
+PRIMARY KEY (id)
+)ENGINE = InnoDB;
+
+CREATE TABLE receipt(
+order_id INT,
+customer_id INT,
+FOREIGN KEY (order_id) REFERENCES retail_order(id),
+FOREIGN KEY (customer_id)REFERENCES customer(id)
+)Engine = InnoDB;
+
+
+
+
+CREATE TABLE employee_form(
+order_id INT,
+employee_id INT,
+FOREIGN KEY (order_id) REFERENCES retail_order(id),
+FOREIGN KEY (employee_id)REFERENCES employee(id)
+)Engine = InnoDB;
+
+INSERT INTO parts(name,price,currency) VALUES('Kindle Display',100,'EUR');
+INSERT INTO parts(name,price,currency) VALUES('Indel Bay Trail M – Quad core CPU',200,'EUR');
+INSERT INTO parts(name,price,currency) VALUES('Cross Knife',24,'EUR');
+INSERT INTO parts(name,price,currency) VALUES('Grinding Plate',34,'EUR');
+INSERT INTO parts(name,price,currency) VALUES('LI-5CT',100,'EUR');
+
+INSERT INTO repaired_device(name,status_report,additional_information)VALUES('Kindle','Done','None');
+INSERT INTO repaired_device (name,status_report,additional_information)VALUES('ASUS-X552M','Repair in progress','Done in 3 days');
+INSERT INTO repaired_device (name,status_report,additional_information)VALUES('Meat Shredder','Done','None');
+INSERT INTO repaired_device(name,status_report,additional_information) VALUES('Nokia 6303i','Waiting','Expecting parts delivery');
+
+INSERT INTO retail_order(device_id,part_id) VALUES(3,3);
+INSERT INTO retail_order(device_id,part_id) VALUES(3,4);
+INSERT INTO retail_order(device_id,part_id) VALUES(1,1);
+INSERT INTO retail_order(device_id,part_id) VALUES(2,2);
+INSERT INTO retail_order(device_id,part_id) VALUES(4,5);
+
+INSERT INTO customer (name,phone,billing_information)VALUES('Sancho Panza',1234567890,'Banco de Espana');
+
+INSERT INTO customer(name,phone,billing_information)VALUES('Peder Pedersen',9876543210,'Norge Bank');
+
+INSERT INTO employee(name)VALUES('El ingenioso hidalgo don Quijote de la Mancha');
+INSERT INTO employee(name)VALUES('Peter Petersen');
+
+INSERT INTO receipt(order_id,customer_id)VALUES(1,1);
+INSERT INTO receipt(order_id,customer_id)VALUES(2,1);
+INSERT INTO receipt(order_id,customer_id)VALUES(3,2);
+
+INSERT INTO employee_form(order_id,employee_id)VALUES(1,1);
+INSERT INTO employee_form(order_id,employee_id)VALUES(2,1);
+INSERT INTO employee_form(order_id,employee_id)VALUES(3,2);
+
+
+
+
+
+
+
+SELECT repaired_device.name,repaired_device.status_report,repaired_device.additional_information,
+parts.name,parts.price,parts.currency
+FROM repaired_device 
+INNER JOIN retail_order 
+ON repaired_device.id = retail_order.device_id
+INNER JOIN receipt 
+ON retail_order.id = receipt.order_id
+INNER JOIN customer 
+ON receipt.customer_id = customer.id
+INNER JOIN parts
+ON retail_order.part_id = parts.id
+WHERE customer.name = 'Sancho Panza';
+
+SELECT SUM(price) ,customer.name
+FROM parts
+JOIN retail_order
+ON parts.id = retail_order.part_id
+JOIN receipt 
+ON retail_order.id = receipt.order_id
+JOIN customer
+ON receipt.customer_id = customer.id
+WHERE customer.name = 'Sancho Panza';
+
+SELECT SUM(price),customer.name 
+FROM parts 
+JOIN retail_order 
+ ON parts.id = retail_order.part_id 
+ JOIN receipt 
+ ON retail_order.id = receipt.order_id 
+ JOIN customer 
+ON receipt.customer_id = customer.id 
+GROUP BY customer.name; 
+
+SELECT * FROM customer WHERE name = 'Sancho Panza'; 
